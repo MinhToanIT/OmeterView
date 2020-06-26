@@ -100,7 +100,6 @@ open class WaterQualityOmeter @JvmOverloads constructor(context: Context, attrs:
 
         drawSpeedUnitText(canvas)
         drawIndicator(canvas)
-        drawNotes(canvas)
     }
 
     override fun updateBackgroundBitmap() {

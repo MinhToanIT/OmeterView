@@ -17,7 +17,6 @@ abstract class Indicator<out I : Indicator<I>> (context: Context): Observable() 
     /**
      * indicator width in pixel, this value has several meaning
      * between [Indicator.Indicators], it will be ignored
-     * when using [ImageIndicator].
      */
     var width: Float = 0f
         set(indicatorWidth) {
@@ -116,7 +115,7 @@ abstract class Indicator<out I : Indicator<I>> (context: Context): Observable() 
 
     /** indicator's shape  */
     enum class Indicators {
-        NoIndicator, NormalIndicator, NormalSmallIndicator, TriangleIndicator, SpindleIndicator, LineIndicator, HalfLineIndicator, QuarterLineIndicator, KiteIndicator, NeedleIndicator
+        KiteIndicator
     }
 
     companion object {
@@ -129,16 +128,7 @@ abstract class Indicator<out I : Indicator<I>> (context: Context): Observable() 
          */
         fun createIndicator(context: Context, speedometer: Speedometer, indicator: Indicators): Indicator<*> {
             return when (indicator) {
-                Indicators.NoIndicator -> NoIndicator(context)
-                Indicators.NormalIndicator -> NormalIndicator(context)
-                Indicators.NormalSmallIndicator -> NormalSmallIndicator(context)
-                Indicators.TriangleIndicator -> TriangleIndicator(context)
-                Indicators.SpindleIndicator -> SpindleIndicator(context)
-                Indicators.LineIndicator -> LineIndicator(context, LineIndicator.LINE)
-                Indicators.HalfLineIndicator -> LineIndicator(context, LineIndicator.HALF_LINE)
-                Indicators.QuarterLineIndicator -> LineIndicator(context, LineIndicator.QUARTER_LINE)
                 Indicators.KiteIndicator -> KiteIndicator(context)
-                Indicators.NeedleIndicator -> NeedleIndicator(context)
 
             }.setTargetSpeedometer(speedometer)
         }

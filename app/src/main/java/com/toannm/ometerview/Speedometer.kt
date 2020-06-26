@@ -6,8 +6,7 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.util.AttributeSet
 import com.toannm.ometerview.components.indicators.Indicator
-import com.toannm.ometerview.components.indicators.NoIndicator
-import com.toannm.ometerview.components.note.Note
+import com.toannm.ometerview.components.indicators.KiteIndicator
 import com.toannm.ometerview.util.OnPrintTickLabelListener
 import java.util.*
 import kotlin.math.abs
@@ -15,14 +14,17 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.text.Typography.degree
 
-abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : Gauge(context, attrs, defStyleAttr) {
+abstract class Speedometer @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : Gauge(context, attrs, defStyleAttr) {
 
     /**
      * needle point to [currentSpeed], cannot be null
      *
-     * add custom [indicator](https://github.com/anastr/SpeedView/wiki/Indicators).
      */
-    var indicator: Indicator<*> = NoIndicator(context)
+    var indicator: Indicator<*> = KiteIndicator(context)
         set(indicator) {
             field.deleteObservers()
             indicator.setTargetSpeedometer(this)
@@ -76,7 +78,7 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
             field = backgroundCircleColor
             circleBackPaint.color = backgroundCircleColor
             invalidateGauge()
-    }
+        }
 
     private var startDegree = 120
     private var endDegree = 120 + 300
@@ -87,9 +89,6 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
      */
     protected var degree = startDegree.toFloat()
         private set
-
-    /** array to contain all notes that will be draw  */
-    private val notes = ArrayList<Note<*>>()
 
     /**
      * change speedometer shape, style and indicator position.<br></br>
@@ -142,11 +141,13 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
 
     /** to rotate tick label  */
     private var tickRotation = true
+
     /**
      *  first padding, set by speedometer.
      *  this will not redraw background bitmap.
      */
     protected var initTickPadding = 10f
+
     /**
      * tick label's padding in pixel.
      */
@@ -187,7 +188,10 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         get() {
             if (this.speedometerMode == Mode.NORMAL)
                 return width
-            return if (this.speedometerMode.isHalf) max(width, height) else max(width, height) * 2 - cutPadding * 2
+            return if (this.speedometerMode.isHalf) max(width, height) else max(
+                width,
+                height
+            ) * 2 - cutPadding * 2
         }
 
     /**
@@ -298,17 +302,22 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         if (ind != -1)
             setIndicator(Indicator.Indicators.values()[ind])
         markColor = a.getColor(R.styleable.Speedometer_sv_markColor, markColor)
-        backgroundCircleColor = a.getColor(R.styleable.Speedometer_sv_backgroundCircleColor, backgroundCircleColor)
+        backgroundCircleColor =
+            a.getColor(R.styleable.Speedometer_sv_backgroundCircleColor, backgroundCircleColor)
         startDegree = a.getInt(R.styleable.Speedometer_sv_startDegree, startDegree)
         endDegree = a.getInt(R.styleable.Speedometer_sv_endDegree, endDegree)
         indicator.width = a.getDimension(R.styleable.Speedometer_sv_indicatorWidth, indicator.width)
-        cutPadding = a.getDimension(R.styleable.Speedometer_sv_cutPadding, cutPadding.toFloat()).toInt()
+        cutPadding =
+            a.getDimension(R.styleable.Speedometer_sv_cutPadding, cutPadding.toFloat()).toInt()
         tickNumber = a.getInteger(R.styleable.Speedometer_sv_tickNumber, ticks.size)
         tickRotation = a.getBoolean(R.styleable.Speedometer_sv_tickRotation, tickRotation)
-        tickPadding = a.getDimension(R.styleable.Speedometer_sv_tickPadding, tickPadding.toFloat()).toInt()
+        tickPadding =
+            a.getDimension(R.styleable.Speedometer_sv_tickPadding, tickPadding.toFloat()).toInt()
         indicator.color = a.getColor(R.styleable.Speedometer_sv_indicatorColor, indicator.color)
-        isWithIndicatorLight = a.getBoolean(R.styleable.Speedometer_sv_withIndicatorLight, isWithIndicatorLight)
-        indicatorLightColor = a.getColor(R.styleable.Speedometer_sv_indicatorLightColor, indicatorLightColor)
+        isWithIndicatorLight =
+            a.getBoolean(R.styleable.Speedometer_sv_withIndicatorLight, isWithIndicatorLight)
+        indicatorLightColor =
+            a.getColor(R.styleable.Speedometer_sv_indicatorLightColor, indicatorLightColor)
         val tickFormat = a.getInt(R.styleable.Speedometer_sv_tickTextFormat, -1)
         if (tickFormat == 0)
             onPrintTickLabel = { _, speed -> "%.0f".format(locale, speed) }
@@ -338,7 +347,8 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         else if (heightMode == MeasureSpec.EXACTLY)
             h
         else if ((widthMode == MeasureSpec.UNSPECIFIED && heightMode == MeasureSpec.UNSPECIFIED)
-                || (widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST))
+            || (widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST)
+        )
             min(defaultSize, min(w, h))
         else {
             if (widthMode == MeasureSpec.AT_MOST)
@@ -372,9 +382,11 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         require(startDegree < endDegree) { "EndDegree must be bigger than StartDegree !" }
         require(endDegree - startDegree <= 360) { "(EndDegree - StartDegree) must be smaller than 360 !" }
         require(startDegree >= speedometerMode.minDegree) {
-            "StartDegree must be bigger than ${speedometerMode.minDegree} in $speedometerMode Mode !" }
+            "StartDegree must be bigger than ${speedometerMode.minDegree} in $speedometerMode Mode !"
+        }
         require(endDegree <= speedometerMode.maxDegree) {
-            "EndDegree must be smaller than ${speedometerMode.maxDegree} in $speedometerMode Mode !" }
+            "EndDegree must be smaller than ${speedometerMode.maxDegree} in $speedometerMode Mode !"
+        }
     }
 
     /**
@@ -409,7 +421,8 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         if (sweep > MAX_LIGHT_SWEEP)
             sweep = MAX_LIGHT_SWEEP
         val colors = intArrayOf(indicatorLightColor, 0x00FFFFFF)
-        val lightSweep = SweepGradient(size * .5f, size * .5f, colors, floatArrayOf(0f, sweep / 360f))
+        val lightSweep =
+            SweepGradient(size * .5f, size * .5f, colors, floatArrayOf(0f, sweep / 360f))
         indicatorLightPaint.shader = lightSweep
         indicatorLightPaint.strokeWidth = indicator.getLightBottom() - indicator.getTop()
 
@@ -421,33 +434,6 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
             canvas.scale(1f, -1f, size * .5f, size * .5f)
         canvas.drawArc(speedometerRect, 0f, sweep, false, indicatorLightPaint)
         canvas.restore()
-    }
-
-    /**
-     * draw Notes,
-     * every Speedometer must call this method at End of it's `onDraw()` method.
-     * @param canvas view canvas to draw notes.
-     */
-    protected fun drawNotes(canvas: Canvas) {
-        for (note in notes) {
-            if (note.getPosition() === Note.Position.CenterSpeedometer)
-                note.draw(canvas, width * .5f, height * .5f)
-            else {
-                val y = when (note.getPosition()) {
-                    Note.Position.TopIndicator -> indicator.getTop()
-                    Note.Position.CenterIndicator -> (indicator.getTop() + indicator.getBottom()) * .5f
-                    Note.Position.BottomIndicator -> indicator.getBottom()
-                    Note.Position.TopSpeedometer -> padding.toFloat()
-                    Note.Position.QuarterSpeedometer -> heightPa * .25f + padding
-                    Note.Position.CenterSpeedometer -> viewCenterY
-                }
-                canvas.save()
-                canvas.rotate(90f + degree, width * .5f, height * .5f)
-                canvas.rotate(-(90f + degree), width * .5f, y)
-                note.draw(canvas, width * .5f, y)
-                canvas.restore()
-            }
-        }
     }
 
     /**
@@ -533,38 +519,10 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         checkStartAndEndDegree()
         cancelSpeedAnimator()
         degree = getDegreeAtSpeed(speed)
-        if (isAttachedToWindow){
+        if (isAttachedToWindow) {
             invalidateGauge()
             tremble()
         }
-    }
-
-    /**
-     * Display new [Note](https://github.com/anastr/SpeedView/wiki/Notes)
-     * for custom seconds.
-     * @param note to display.
-     * @param showTimeMillisecond time to remove Note, 3 sec by default.
-     */
-    fun addNote(note: Note<*>, showTimeMillisecond: Long = 3000) {
-        note.build(width)
-        notes.add(note)
-        if (showTimeMillisecond == Note.INFINITE.toLong())
-            return
-        postDelayed({
-            if (isAttachedToWindow) {
-                notes.remove(note)
-                postInvalidate()
-            }
-        }, showTimeMillisecond)
-        invalidate()
-    }
-
-    /**
-     * remove All [Notes](https://github.com/anastr/SpeedView/wiki/Notes).
-     */
-    fun removeAllNotes() {
-        notes.clear()
-        invalidate()
     }
 
     /**
@@ -586,8 +544,17 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
             tickStart = "%.0f".format(locale, minSpeed)
         c.save()
         c.rotate(startDegree + 90f, size * .5f, size * .5f)
-        c.rotate(-(startDegree + 90f), sizePa * .5f - textPaint.textSize + padding, textPaint.textSize + padding)
-        c.drawText(tickStart.toString(), sizePa * .5f - textPaint.textSize + padding, textPaint.textSize + padding, textPaint)
+        c.rotate(
+            -(startDegree + 90f),
+            sizePa * .5f - textPaint.textSize + padding,
+            textPaint.textSize + padding
+        )
+        c.drawText(
+            tickStart.toString(),
+            sizePa * .5f - textPaint.textSize + padding,
+            textPaint.textSize + padding,
+            textPaint
+        )
         c.restore()
         textPaint.textAlign = when {
             endDegree % 360 <= 90 -> Paint.Align.RIGHT
@@ -603,8 +570,17 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
             tickEnd = "%.0f".format(locale, maxSpeed)
         c.save()
         c.rotate(endDegree + 90f, size * .5f, size * .5f)
-        c.rotate(-(endDegree + 90f), sizePa * .5f + textPaint.textSize + padding.toFloat(), textPaint.textSize + padding)
-        c.drawText(tickEnd.toString(), sizePa * .5f + textPaint.textSize + padding.toFloat(), textPaint.textSize + padding, textPaint)
+        c.rotate(
+            -(endDegree + 90f),
+            sizePa * .5f + textPaint.textSize + padding.toFloat(),
+            textPaint.textSize + padding
+        )
+        c.drawText(
+            tickEnd.toString(),
+            sizePa * .5f + textPaint.textSize + padding.toFloat(),
+            textPaint.textSize + padding,
+            textPaint
+        )
         c.restore()
     }
 
@@ -624,7 +600,11 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
             c.save()
             c.rotate(d + 90f, size * .5f, size * .5f)
             if (!tickRotation)
-                c.rotate(-(d + 90f), size * .5f, initTickPadding + textPaint.textSize + padding.toFloat() + tickPadding.toFloat())
+                c.rotate(
+                    -(d + 90f),
+                    size * .5f,
+                    initTickPadding + textPaint.textSize + padding.toFloat() + tickPadding.toFloat()
+                )
 
             var tick: CharSequence? = null
             if (onPrintTickLabel != null)
@@ -635,7 +615,7 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
 
             c.translate(0f, initTickPadding + padding.toFloat() + tickPadding.toFloat())
             StaticLayout(tick, textPaint, size, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false)
-                    .draw(c)
+                .draw(c)
 
             c.restore()
         }
@@ -660,16 +640,30 @@ abstract class Speedometer @JvmOverloads constructor(context: Context, attrs: At
         translatedDy = if (this.speedometerMode.isBottom) -size * .5f + cutPadding else 0f
     }
 
-    enum class Mode(internal val minDegree: Int, internal val maxDegree: Int, val isHalf: Boolean, internal val divWidth: Int, internal val divHeight: Int) {
+    enum class Mode(
+        internal val minDegree: Int,
+        internal val maxDegree: Int,
+        val isHalf: Boolean,
+        internal val divWidth: Int,
+        internal val divHeight: Int
+    ) {
         NORMAL(0, 360 * 2, false, 1, 1)
-        , LEFT(90, 270, true, 2, 1)
-        , TOP(180, 360, true, 1, 2)
-        , RIGHT(270, 450, true, 2, 1)
-        , BOTTOM(0, 180, true, 1, 2)
-        , TOP_LEFT(180, 270, false, 1, 1)
-        , TOP_RIGHT(270, 360, false, 1, 1)
-        , BOTTOM_RIGHT(0, 90, false, 1, 1)
-        , BOTTOM_LEFT(90, 180, false, 1, 1);
+        ,
+        LEFT(90, 270, true, 2, 1)
+        ,
+        TOP(180, 360, true, 1, 2)
+        ,
+        RIGHT(270, 450, true, 2, 1)
+        ,
+        BOTTOM(0, 180, true, 1, 2)
+        ,
+        TOP_LEFT(180, 270, false, 1, 1)
+        ,
+        TOP_RIGHT(270, 360, false, 1, 1)
+        ,
+        BOTTOM_RIGHT(0, 90, false, 1, 1)
+        ,
+        BOTTOM_LEFT(90, 180, false, 1, 1);
 
         val isLeft: Boolean
             get() = this == LEFT || this == TOP_LEFT || this == BOTTOM_LEFT
